@@ -48,16 +48,6 @@ exports.init = function(SARAH) {
 
 exports.action = function(data, callback) {
 
-    data = {};
-    data.switchOn = true;
-    data.group = {
-        chambre: {
-            setEffect: 'colorloop',
-            setSaturation: 255,
-            setHue: 46920
-        }
-    };
-
     var propagate = function(data, entityData) {
         if (data.switchOn) {
             entityData.switchOn = data.switchOn;
