@@ -1,0 +1,17 @@
+{
+  "modules" : {
+    "lights"  : {
+      "description": "Lights (Philips Hue, maybe LIFX and LightFreq later) plugin controller",
+      "version"    : "1.0",
+      "philips-hue" : {
+        "hub-address": "127.0.0.1",
+        "api-user": "sarah-lights"
+      },
+      "language": "fr",
+      "groups"      : {
+        "chambre" : ["hue-1", "hue-2"],
+        "salon" : ["hue-3"]
+      }
+    }
+  }
+}
