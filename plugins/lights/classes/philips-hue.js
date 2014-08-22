@@ -13,22 +13,22 @@ var PhilipsHueModule = function(config, log, translationEngine) {
 
     var PhilipsHue = function(id) {
         this.id = id;
-        this.on;
-        this.sat;
-        this.bri;
-        this.hue;
-        this.ct;
-        this.alert;
-        this.effect;
+        this.on = null;
+        this.sat = null;
+        this.bri = null;
+        this.hue = null;
+        this.ct = null;
+        this.alert = null;
+        this.effect = null;
     };
     PhilipsHue.prototype = Object.create(PhilipsHue.prototype);
     PhilipsHue.prototype.addValue = function(value, addedValue, limit) {
         return (limit + value + addedValue) % limit;
     };
-    PhilipsHue.prototype.on = function(value) {
+    PhilipsHue.prototype.switchOn = function(value) {
         this.on = value;
     };
-    PhilipsHue.prototype.saturation = function(value) {
+    PhilipsHue.prototype.setSaturation = function(value) {
         this.sat = value;
     };
     PhilipsHue.prototype.moreSaturation = function(value) {
@@ -37,7 +37,7 @@ var PhilipsHueModule = function(config, log, translationEngine) {
     PhilipsHue.prototype.lessSaturation = function(value) {
         this.sat = addValue(this.sat, -1 * value, 256);
     };
-    PhilipsHue.prototype.brightness = function(value) {
+    PhilipsHue.prototype.setBrightness = function(value) {
         this.bri = value;
     };
     PhilipsHue.prototype.moreBrightness = function(value) {
@@ -46,7 +46,7 @@ var PhilipsHueModule = function(config, log, translationEngine) {
     PhilipsHue.prototype.lessBrightness = function(value) {
         this.bri = addValue(this.bri, -1 * value, 256);
     };
-    PhilipsHue.prototype.hue = function(value) {
+    PhilipsHue.prototype.setHue = function(value) {
         this.hue = value;
     };
     PhilipsHue.prototype.moreHue = function(value) {
@@ -55,7 +55,7 @@ var PhilipsHueModule = function(config, log, translationEngine) {
     PhilipsHue.prototype.lessHue = function(value) {
         this.hue = addValue(this.hue, -1 * value, 65536);
     };
-    PhilipsHue.prototype.temperature = function(value) {
+    PhilipsHue.prototype.setTemperature = function(value) {
         this.ct = value;
     };
     PhilipsHue.prototype.colder = function(value) {
@@ -64,10 +64,10 @@ var PhilipsHueModule = function(config, log, translationEngine) {
     PhilipsHue.prototype.hotter = function(value) {
         this.ct = addValue(this.ct, -1 * value, 500 - 153) + 153;
     };
-    PhilipsHue.prototype.alert = function(value) {
+    PhilipsHue.prototype.setAlert = function(value) {
         this.alert = value ? 'select' : 'none';
     };
-    PhilipsHue.prototype.effect = function(value) {
+    PhilipsHue.prototype.setEffect = function(value) {
         this.effect = value;
     };
     PhilipsHue.prototype.update = function(currentState) {
@@ -91,30 +91,37 @@ var PhilipsHueModule = function(config, log, translationEngine) {
         };
     };
     PhilipsHue.prototype.execute = function(params) {
+        var instance = this;
+        log('Executing changes for Philips Hue '+instance.id, 'DEBUG');
         var treat = function(currentState) {
-            this.update(currentState.state);
+            var callback = function(body){
+                log('Return', 'DEBUG');
+                log(body, 'DEBUG');
+            };
+            instance.update(currentState.state);
             for (var operation in params) {
-                if (typeof this[operation] !== 'function') {
+                if (typeof instance[operation] !== 'function') {
                     log(operation + t('is-an-unknown-operation'));
                     continue;
                 }
-                this[operation](params[operation]);
+                log('Setting '+instance.id+' with '+operation+' '+params[operation], 'DEBUG');
+                instance[operation](params[operation]);
             }
-            network.put('lights/' + this.id + '/state', this.extractRequest, config);
+            bridge.put('lights/' + instance.id + '/state', instance.extractRequest(), callback);
         };
-        network.get('lights/' + id, config, treat);
+        bridge.get('lights/' + this.id, treat);
     };
 
 
-    var network = {
+    var bridge = {
         get: function(path, callback) {
-            request(path, {}, callback);
+            bridge.request(path, {}, callback);
         },
         post: function(path, body, callback) {
-            request(path, {'method': 'post', 'body': JSON.stringify(body)}, callback);
+            bridge.request(path, {'method': 'post', 'body': JSON.stringify(body)}, callback);
         },
         put: function(path, body, callback) {
-            request(path, {'method': 'put', 'body': JSON.stringify(body)}, callback);
+            bridge.request(path, {'method': 'put', 'body': JSON.stringify(body)}, callback);
         },
         request: function(path, data, callback) {
             data.uri = 'http://' + config['philips-hue']['hub-address'] + '/api' + (path !== false ? '/' + config['philips-hue']['api-user'] + '/' + path : '');
@@ -143,6 +150,7 @@ var PhilipsHueModule = function(config, log, translationEngine) {
             },
             user: function() {
                 var callback = function(json) {
+                    log(t('philips-hue-user-configuration'));
                     // A TTS means an error
                     if (json.tts) {
                         state.user = false;
@@ -155,10 +163,10 @@ var PhilipsHueModule = function(config, log, translationEngine) {
                         return;
                     }
                     // Create a new user
-                    network.post(false, {
-                        'devicetype': 'SARAH',
-                        'username': config.username
-                    }, config, function(json) {
+                    bridge.post(false, {
+                        'devicetype': 'S.A.R.A.H.',
+                        'username': config['philips-hue']['api-user']
+                    }, function(json) {
                         if (json.tts || json[0].error) {
                             state.user = false;
                             log(t('philips-hue-bridge-unreachable'));
@@ -166,10 +174,11 @@ var PhilipsHueModule = function(config, log, translationEngine) {
                             return;
                         }
                         state.user = true;
-                        log(t('user-created-user-created'));
+                        config['philips-hue']['api-user'] = json[0].success.username;
+                        log(t('philips-hue-user-created')+' : '+config['philips-hue']['api-user']);
                     });
                 };
-                network.get('', callback);
+                bridge.get('', callback);
             }
         };
 

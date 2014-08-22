@@ -2,9 +2,11 @@ var text = {
     'language-not-found': "Language not found",
     'key-not-found': "Key not found",
     'fr': {
-        'philips-hue-bridge-unreachable': "Impossible de commander le pont Hue",
+        'request': "Requête",
+        'philips-hue-bridge-unreachable': "Impossible de commander le pont Philips Hue",
         'philips-hue-incomplete-configuration': "Configuration Philips Hue invalide",
-        'philips-hue-user-created': "Utilisateur Philips-Hue-créé",
+        'philips-hue-user-created': "Utilisateur Philips Hue créé",
+        'philips-hue-user-configuration': "Configuration de l'utilisateur du pont Philips Hue",
         'executing-order': "D'accord, je m'en occupe",
         'is-an-unknown-type': " n'est pas un type connu",
         'is-an-unknown-group': " n'est pas un groupe connu",

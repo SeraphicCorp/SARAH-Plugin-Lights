@@ -7,9 +7,9 @@
 
             <item>Sarah </item>
             <one-of>
-                <item>allume la lumière <tag>out.action.on=true;currentType='device';currentID='hue-3';out.action.group={};out.action[currentType][currentID]={}</tag></item>
-                <item>éclaire <tag>out.action.on=true</tag></item>
-                <item>éteins la lumière <tag>out.action.on=false</tag></item>
+                <item>allume la lumière <tag>out.action.switchOn=true;currentType='device';currentID='hue-3';out.action.group={};out.action[currentType][currentID]={}</tag></item>
+                <item>éclaire <tag>out.action.switchOn=true</tag></item>
+                <item>éteins la lumière <tag>out.action.switchOn=false</tag></item>
                 <item>définis la lumière </item>
                 <item>règle la lumière </item>
                 <item>déclenche une boucle <tag>out.action.effect='colorloop'</tag></item>
@@ -59,9 +59,9 @@
                     <item>teinte plus forte <tag>out.action[currentType][currentID].moreHue=65536*7/100</tag></item>
                     <item>température plus froide <tag>out.action[currentType][currentID].colder=(500-153)*7/100</tag></item>
                     <item>température plus chaude <tag>out.action[currentType][currentID].hotter=(500-153)*7/100</tag></item>
-                    <item>couleur rouge <tag>out.action[currentType][currentID].hue=0</tag></item>
-                    <item>couleur verte <tag>out.action[currentType][currentID].hue=25500</tag></item>
-                    <item>couleur bleue <tag>out.action[currentType][currentID].hue=46920</tag></item>
+                    <item>couleur rouge <tag>out.action[currentType][currentID].setHue=0</tag></item>
+                    <item>couleur verte <tag>out.action[currentType][currentID].setHue=25500</tag></item>
+                    <item>couleur bleue <tag>out.action[currentType][currentID].setHue=46920</tag></item>
                 </one-of>
             </item>
         </item>

@@ -7,7 +7,7 @@ var t;
 var CoreModule;
 var PhilipsHueModule;
 
-var CoreModuleFactory = function(config, log, t) {
+var CoreModuleFactory = function (config, log, t) {
     var objectFactory = function(id) {
         var tmp = id.split("-");
         var type = tmp[0];
@@ -29,8 +29,8 @@ var CoreModuleFactory = function(config, log, t) {
             log(id + t('is-an-unknown-group'));
             return;
         }
-        for (var deviceID in config.groups[id]) {
-            setLight(deviceID, params, config);
+        for (var index in config.groups[id]) {
+            setLight(config.groups[id][index], params);
         }
     };
     return {
@@ -47,26 +47,37 @@ exports.init = function(SARAH) {
 };
 
 exports.action = function(data, callback) {
-    var propagate = function(data, entityData){
-            if (data.on) {
-                entityData.on = data.on;
-            }
-            if (data.effect) {
-                entityData.effect = data.effect;
-            }
+
+    data = {};
+    data.switchOn = true;
+    data.group = {
+        chambre: {
+            setEffect: 'colorloop',
+            setSaturation: 255,
+            setHue: 46920
+        }
+    };
+
+    var propagate = function(data, entityData) {
+        if (data.switchOn) {
+            entityData.switchOn = data.switchOn;
+        }
+        if (data.setEffect) {
+            entityData.setAlert = data.setAlert;
+        }
     };
     // Handle group (data.group is an object containing objects indexed by id)
     if (data.group) {
         for (var id in data.group) {
             propagate(data, data.group[id]);
-            hue.setGroup(id, data.group[id], config, callback);
+            CoreModule.setGroup(id, data.group[id]);
         }
     }
     // Handle device (data.device is an object containing objects indexed by id)
     if (data.device) {
         for (var id in data.device) {
             propagate(data, data.device[id]);
-            hue.setDevice(id, data.device[id], config, callback);
+            CoreModule.setLight(id, data.device[id]);
         }
     }
     return callback('tts', t('executing-order'));
