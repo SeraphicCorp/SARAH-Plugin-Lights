@@ -11,7 +11,8 @@
       "groups"      : {
         "chambre" : ["hue-1", "hue-2"],
         "salon" : ["hue-3"]
-      }
+      },
+      "debug": true
     }
   }
 }

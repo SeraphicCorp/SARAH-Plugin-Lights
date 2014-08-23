@@ -26,7 +26,7 @@ var PhilipsHueModule = function(config, log, translationEngine) {
         return (limit + value + addedValue) % limit;
     };
     PhilipsHue.prototype.switchOn = function(value) {
-        this.on = value;
+        this.on = value !== '0';
     };
     PhilipsHue.prototype.setSaturation = function(value) {
         this.sat = value;
@@ -65,7 +65,7 @@ var PhilipsHueModule = function(config, log, translationEngine) {
         this.ct = addValue(this.ct, -1 * value, 500 - 153) + 153;
     };
     PhilipsHue.prototype.setAlert = function(value) {
-        this.alert = value ? 'select' : 'none';
+        this.alert = value !== '0' ? 'select' : 'none';
     };
     PhilipsHue.prototype.setEffect = function(value) {
         this.effect = value;
@@ -90,24 +90,27 @@ var PhilipsHueModule = function(config, log, translationEngine) {
             effect: this.effect
         };
     };
+    var showWebserviceReturn = function(body) {
+        log('Return', 'DEBUG');
+        log(body, 'DEBUG');
+    };
+    var executeOperation = function(instance, operation, param) {
+        if (typeof instance[operation] !== 'function') {
+            log(operation + t('is-an-unknown-operation'));
+            return;
+        }
+        log('Setting ' + instance.id + ' with ' + operation + ' ' + param, 'DEBUG');
+        instance[operation](param);
+    };
     PhilipsHue.prototype.execute = function(params) {
         var instance = this;
-        log('Executing changes for Philips Hue '+instance.id, 'DEBUG');
+        log('Executing changes for Philips Hue ' + instance.id, 'DEBUG');
         var treat = function(currentState) {
-            var callback = function(body){
-                log('Return', 'DEBUG');
-                log(body, 'DEBUG');
-            };
             instance.update(currentState.state);
             for (var operation in params) {
-                if (typeof instance[operation] !== 'function') {
-                    log(operation + t('is-an-unknown-operation'));
-                    continue;
-                }
-                log('Setting '+instance.id+' with '+operation+' '+params[operation], 'DEBUG');
-                instance[operation](params[operation]);
+                executeOperation(instance, operation, params[operation]);
             }
-            bridge.put('lights/' + instance.id + '/state', instance.extractRequest(), callback);
+            bridge.put('lights/' + instance.id + '/state', instance.extractRequest(), showWebserviceReturn);
         };
         bridge.get('lights/' + this.id, treat);
     };
@@ -175,7 +178,7 @@ var PhilipsHueModule = function(config, log, translationEngine) {
                         }
                         state.user = true;
                         config['philips-hue']['api-user'] = json[0].success.username;
-                        log(t('philips-hue-user-created')+' : '+config['philips-hue']['api-user']);
+                        log(t('philips-hue-user-created') + ' : ' + config['philips-hue']['api-user']);
                     });
                 };
                 bridge.get('', callback);

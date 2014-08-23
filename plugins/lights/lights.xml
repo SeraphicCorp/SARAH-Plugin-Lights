@@ -1,69 +1,72 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE grammar PUBLIC "-//W3C//DTD GRAMMAR 1.0//EN" "http://www.w3.org/TR/speech-grammar/grammar.dtd">
 <grammar version="1.0" xml:lang="fr-FR" mode="voice" root="ruleLights" xmlns="http://www.w3.org/2001/06/grammar" tag-format="semantics/1.0">
     <rule id="ruleLights" scope="public">
-        <item>
-            <tag>out.action=new Object(); </tag>
-
-            <item>Sarah </item>
-            <one-of>
-                <item>allume la lumière <tag>out.action.switchOn=true;currentType='device';currentID='hue-3';out.action.group={};out.action[currentType][currentID]={}</tag></item>
-                <item>éclaire <tag>out.action.switchOn=true</tag></item>
-                <item>éteins la lumière <tag>out.action.switchOn=false</tag></item>
-                <item>définis la lumière </item>
-                <item>règle la lumière </item>
-                <item>déclenche une boucle <tag>out.action.effect='colorloop'</tag></item>
-                <item>stoppe la boucle <tag>out.action.effect='none'</tag></item>
-            </one-of>
-
-            <item repeat="0-">
-                <one-of>
-                    <item>dans </item>
-                    <item>pour </item>
-                    <item>le </item>
-                    <item>la </item>
-                    <item>du </item>
-                    <item>de </item>
-                </one-of>
-            </item>
-
-            <item repeat="0-">
-                <one-of>
-                    <item>salon <tag>currentType='device';currentID='hue-3';out.action.group={};out.action[currentType][currentID]={}</tag> <ruleref uri="operations"/>
-                    </item>
-                    <item>chambre <tag>currentType='group';currentID='chambre';out.action.group={};out.action.[currentType][currentID]={}</tag> <ruleref uri="operations"/>
-                    </item>
-                </one-of>
-            </item>
-            <tag>out.action._attributes.uri="http://127.0.0.1:8080/sarah/lights";</tag>
-        </item>
-    </rule>
-    <rule id="operations" scope="private">
-        <item repeat="0-">
-            <item repeat="0-1">et </item>
-            <item repeat="0-1">avec </item>
-            <item repeat="0-1">comme </item>
-            <item repeat="0-1">
-                <one-of>
-                    <item>une </item>
-                    <item>la </item>
-                </one-of>
-            </item>
+        <tag>out.action=new Object(); </tag>
+        <item>Sarah </item>
+        <one-of>
             <item>
-                <one-of>
-                    <item>saturation plus forte <tag>out.action[currentType][currentID].moreSaturation=256*7/100</tag></item>
-                    <item>saturation moins forte <tag>out.action[currentType][currentID].lessSaturation=256*7/100</tag></item>
-                    <item>luminosité plus forte <tag>out.action[currentType][currentID].lessBrightness=256*7/100</tag></item>
-                    <item>luminosité moins forte <tag>out.action[currentType][currentID].moreBrightness=256*7/100</tag></item>
-                    <item>teinte moins forte <tag>out.action[currentType][currentID].lessHue=65536*7/100</tag></item>
-                    <item>teinte plus forte <tag>out.action[currentType][currentID].moreHue=65536*7/100</tag></item>
-                    <item>température plus froide <tag>out.action[currentType][currentID].colder=(500-153)*7/100</tag></item>
-                    <item>température plus chaude <tag>out.action[currentType][currentID].hotter=(500-153)*7/100</tag></item>
-                    <item>couleur rouge <tag>out.action[currentType][currentID].setHue=0</tag></item>
-                    <item>couleur verte <tag>out.action[currentType][currentID].setHue=25500</tag></item>
-                    <item>couleur bleue <tag>out.action[currentType][currentID].setHue=46920</tag></item>
-                </one-of>
+                <item>
+                    <one-of>
+                        <item>allume la lumière <tag>out.action.switchOn=1</tag></item>
+                        <item>éclaire <tag>out.action.switchOn=1</tag></item>
+                        <item>éteins la lumière <tag>out.action.switchOn=0</tag></item>
+                        <item>définis la lumière </item>
+                        <item>règle la lumière </item>
+                    </one-of>
+                </item>
+
+                <item repeat="1-">
+                    <item repeat="0-2">
+                        <one-of>
+                            <item>dans </item>
+                            <item>pour </item>
+                            <item>le </item>
+                            <item>la </item>
+                            <item>du </item>
+                            <item>de </item>
+                        </one-of>
+                    </item>
+                    <item>
+                        <one-of>
+                            <item>salon
+                                <tag>out.action.target='device--hue-3';</tag>
+                            </item>
+                            <item>chambre
+                                <tag>out.action.target='group--chambre';</tag>
+                            </item>
+                        </one-of>
+                        <tag>if(typeof out.action.switchOn !== 'undefined'){out.action['switchOn--'+out.action.target]=out.action.switchOn}</tag>
+                    </item>
+                    <item repeat="0-10">
+                        <item repeat="0-1">avec </item>
+                        <item repeat="0-1">comme </item>
+                        <item repeat="0-1">
+                            <one-of>
+                                <item>une </item>
+                                <item>la </item>
+                            </one-of>
+                        </item>
+                        <item>
+                            <one-of>
+                                <item>saturation plus forte <tag>out.action['moreSaturation--'+out.action.target]=Math.floor(256*7/100)</tag></item>
+                                <item>saturation moins forte <tag>out.action['lessSaturation--'+out.action.target]=Math.floor(256*7/100)</tag></item>
+                                <item>luminosité plus forte <tag>out.action['moreBrightness--'+out.action.target]=Math.floor(256*7/100)</tag></item>
+                                <item>luminosité moins forte <tag>out.action['lessBrightness--'+out.action.target]=Math.floor(256*7/100)</tag></item>
+                                <item>teinte moins forte <tag>out.action['lessHue--'+out.action.target]=Math.floor(65536*7/100)</tag></item>
+                                <item>teinte plus forte <tag>out.action['moreHue--'+out.action.target]=Math.floor(65536*7/100)</tag></item>
+                                <item>température plus froide <tag>out.action['colder--'+out.action.target]=Math.floor((500-153)*7/100)</tag></item>
+                                <item>température plus chaude <tag>out.action['hotter--'+out.action.target]=Math.floor((500-153)*7/100)</tag></item>
+                                <item>couleur rouge <tag>out.action['setHue--'+out.action.target]=0</tag></item>
+                                <item>couleur verte <tag>out.action['setHue--'+out.action.target]=25500</tag></item>
+                                <item>couleur bleue <tag>out.action['setHue--'+out.action.target]=46920</tag></item>
+                            </one-of>
+                        </item>
+                    </item>
+                </item>
             </item>
-        </item>
+            <item>déclenche une boucle <tag>out.action['setEffect--group--chambre']='colorloop'</tag></item>
+            <item>stoppe la boucle <tag>out.action['setEffect--group--chambre']='none'</tag></item>
+        </one-of>
+        <tag>out.action._attributes.uri="http://127.0.0.1:8080/sarah/lights";</tag>
     </rule>
 </grammar>
