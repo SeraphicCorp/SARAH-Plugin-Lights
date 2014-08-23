@@ -4,7 +4,7 @@
       "description": "Lights (Philips Hue, maybe LIFX and LightFreq later) plugin controller",
       "version"    : "1.0",
       "philips-hue" : {
-        "hub-address": "hub.example.com",
+        "hub-address": "hue.example.com",
         "api-user": "sarah-lights"
       },
       "language": "fr",
@@ -12,7 +12,7 @@
         "chambre" : ["hue-1", "hue-2"],
         "salon" : ["hue-3"]
       },
-      "debug": true
+      "debug": false
     }
   }
 }

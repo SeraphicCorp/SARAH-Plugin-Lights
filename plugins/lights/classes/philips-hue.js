@@ -20,55 +20,70 @@ var PhilipsHueModule = function(config, log, translationEngine) {
         this.ct = null;
         this.alert = null;
         this.effect = null;
+        this.valuesToExtract = [];
     };
     PhilipsHue.prototype = Object.create(PhilipsHue.prototype);
-    PhilipsHue.prototype.addValue = function(value, addedValue, limit) {
-        return (limit + value + addedValue) % limit;
+    PhilipsHue.prototype.adaptValue = function(value, limit) {
+        var newValue = (limit + parseInt(value)) % limit;
+        log('New value', 'DEBUG');
+        log(newValue, 'DEBUG');
+        return newValue;
     };
     PhilipsHue.prototype.switchOn = function(value) {
-        this.on = value !== '0';
+        var newValue = value !== '0';
+        if (this.on === newValue){
+            return;
+        }
+        this.on = newValue;
+        this.valuesToExtract.push('on');
     };
     PhilipsHue.prototype.setSaturation = function(value) {
-        this.sat = value;
+        this.sat = this.adaptValue(value, 256);
+        this.valuesToExtract.push('sat');
     };
     PhilipsHue.prototype.moreSaturation = function(value) {
-        this.sat = this.addValue(this.sat, value, 256);
+        this.setSaturation(this.sat + parseInt(value));
     };
     PhilipsHue.prototype.lessSaturation = function(value) {
-        this.sat = this.addValue(this.sat, -1 * value, 256);
+        this.setSaturation(this.sat - parseInt(value));
     };
     PhilipsHue.prototype.setBrightness = function(value) {
-        this.bri = value;
+        this.bri = this.adaptValue(value, 256);
+        this.valuesToExtract.push('bri');
     };
     PhilipsHue.prototype.moreBrightness = function(value) {
-        this.bri = this.addValue(this.bri, value, 256);
+        this.setBrightness(this.bri + parseInt(value));
     };
     PhilipsHue.prototype.lessBrightness = function(value) {
-        this.bri = this.addValue(this.bri, -1 * value, 256);
+        this.setBrightness(this.bri - parseInt(value));
     };
     PhilipsHue.prototype.setHue = function(value) {
-        this.hue = value;
+        this.hue = this.adaptValue(value, 65536);
+        this.valuesToExtract.push('hue');
     };
     PhilipsHue.prototype.moreHue = function(value) {
-        this.hue = this.addValue(this.hue, value, 65536);
+        this.setHue(this.hue + parseInt(value));
     };
     PhilipsHue.prototype.lessHue = function(value) {
-        this.hue = this.addValue(this.hue, -1 * value, 65536);
+        this.setHue(this.hue - parseInt(value));
     };
     PhilipsHue.prototype.setTemperature = function(value) {
-        this.ct = value;
+        this.ct = this.adaptValue(value, 500 - 153) + 153;
+        this.valuesToExtract.push('ct');
     };
     PhilipsHue.prototype.colder = function(value) {
-        this.ct = this.addValue(this.ct, -1 * value, 500 - 153) + 153;
+        this.setTemperature(this.ct - parseInt(value));
     };
     PhilipsHue.prototype.hotter = function(value) {
-        this.ct = this.addValue(this.ct, -1 * value, 500 - 153) + 153;
+        this.setTemperature(this.ct + parseInt(value));
     };
     PhilipsHue.prototype.setAlert = function(value) {
         this.alert = value !== '0' ? 'select' : 'none';
+        this.valuesToExtract.push('alert');
     };
     PhilipsHue.prototype.setEffect = function(value) {
         this.effect = value;
+        this.valuesToExtract.push('effect');
     };
     PhilipsHue.prototype.update = function(currentState) {
         this.on = currentState.on;
@@ -80,15 +95,11 @@ var PhilipsHueModule = function(config, log, translationEngine) {
         this.effect = currentState.effect;
     };
     PhilipsHue.prototype.extractRequest = function() {
-        return {
-            on: this.on,
-            sat: this.sat,
-            bri: this.bri,
-            hue: this.hue,
-            ct: this.ct,
-            alert: this.alert,
-            effect: this.effect
-        };
+        var extract = {};
+        for (var index in this.valuesToExtract){
+            extract[this.valuesToExtract[index]] = this[this.valuesToExtract[index]];
+        }
+        return extract;
     };
     var showWebserviceReturn = function(body) {
         log('Return', 'DEBUG');
@@ -107,11 +118,16 @@ var PhilipsHueModule = function(config, log, translationEngine) {
         var instance = this;
         log('Executing changes for Philips Hue ' + instance.id, 'DEBUG');
         var treat = function(currentState) {
+            log('currentState', 'DEBUG');
+            log(currentState, 'DEBUG');
             instance.update(currentState.state);
             for (var operation in params) {
                 executeOperation(instance, operation, params[operation]);
             }
-            bridge.put('lights/' + instance.id + '/state', instance.extractRequest(), showWebserviceReturn);
+            var body = instance.extractRequest();
+            log('request', 'DEBUG');
+            log(body, 'DEBUG');
+            bridge.put('lights/' + instance.id + '/state', body, showWebserviceReturn);
         };
         bridge.get('lights/' + instance.id, treat);
     };

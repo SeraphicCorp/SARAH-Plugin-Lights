@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <grammar version="1.0" xml:lang="fr-FR" mode="voice" root="ruleLights" xmlns="http://www.w3.org/2001/06/grammar" tag-format="semantics/1.0">
     <rule id="ruleLights" scope="public">
+        <example>Sarah règle la lumière de la chambre avec une couleur bleue</example>
         <tag>out.action=new Object(); </tag>
         <item>Sarah </item>
         <one-of>
@@ -48,14 +49,20 @@
                         </item>
                         <item>
                             <one-of>
-                                <item>saturation plus forte <tag>out.action['moreSaturation--'+out.action.target]=Math.floor(256*7/100)</tag></item>
-                                <item>saturation moins forte <tag>out.action['lessSaturation--'+out.action.target]=Math.floor(256*7/100)</tag></item>
-                                <item>luminosité plus forte <tag>out.action['moreBrightness--'+out.action.target]=Math.floor(256*7/100)</tag></item>
-                                <item>luminosité moins forte <tag>out.action['lessBrightness--'+out.action.target]=Math.floor(256*7/100)</tag></item>
-                                <item>teinte moins forte <tag>out.action['moreHue--'+out.action.target]=Math.floor(65536*7/100)</tag></item>
-                                <item>teinte plus forte <tag>out.action['lessHue--'+out.action.target]=Math.floor(65536*7/100)</tag></item>
-                                <item>température plus froide <tag>out.action['colder--'+out.action.target]=Math.floor((500-153)*7/100)</tag></item>
-                                <item>température plus chaude <tag>out.action['hotter--'+out.action.target]=Math.floor((500-153)*7/100)</tag></item>
+                                <item>saturation maximale <tag>out.action['setSaturation--'+out.action.target]=255</tag></item>
+                                <item>saturation plus forte <tag>out.action['moreSaturation--'+out.action.target]=Math.floor(255*20/100)</tag></item>
+                                <item>saturation moins forte <tag>out.action['lessSaturation--'+out.action.target]=Math.floor(255*20/100)</tag></item>
+                                <item>saturation minimale <tag>out.action['setSaturation--'+out.action.target]=0</tag></item>
+                                <item>luminosité maximale <tag>out.action['setBrightness--'+out.action.target]=255</tag></item>
+                                <item>luminosité plus forte <tag>out.action['moreBrightness--'+out.action.target]=Math.floor(255*20/100)</tag></item>
+                                <item>luminosité moins forte <tag>out.action['lessBrightness--'+out.action.target]=Math.floor(255*20/100)</tag></item>
+                                <item>luminosité minimale <tag>out.action['setBrightness--'+out.action.target]=0</tag></item>
+                                <item>teinte moins forte <tag>out.action['moreHue--'+out.action.target]=Math.floor(65535*20/100)</tag></item>
+                                <item>teinte plus forte <tag>out.action['lessHue--'+out.action.target]=Math.floor(65535*20/100)</tag></item>
+                                <item>température maximale <tag>out.action['setTemperature--'+out.action.target]=500</tag></item>
+                                <item>température plus chaude <tag>out.action['hotter--'+out.action.target]=Math.floor((500-153)*20/100)+153</tag></item>
+                                <item>température plus froide <tag>out.action['colder--'+out.action.target]=Math.floor((500-153)*20/100)+153</tag></item>
+                                <item>température minimale <tag>out.action['setTemperature--'+out.action.target]=153</tag></item>
                                 <item>couleur rouge <tag>out.action['setHue--'+out.action.target]=0</tag></item>
                                 <item>couleur verte <tag>out.action['setHue--'+out.action.target]=25500</tag></item>
                                 <item>couleur bleue <tag>out.action['setHue--'+out.action.target]=46920</tag></item>
