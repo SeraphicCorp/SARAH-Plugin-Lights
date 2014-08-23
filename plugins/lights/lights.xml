@@ -37,7 +37,7 @@
                         </one-of>
                         <tag>if(typeof out.action.switchOn !== 'undefined'){out.action['switchOn--'+out.action.target]=out.action.switchOn}</tag>
                     </item>
-                    <item repeat="0-10">
+                    <item repeat="0-1">
                         <item repeat="0-1">avec </item>
                         <item repeat="0-1">comme </item>
                         <item repeat="0-1">
@@ -52,8 +52,8 @@
                                 <item>saturation moins forte <tag>out.action['lessSaturation--'+out.action.target]=Math.floor(256*7/100)</tag></item>
                                 <item>luminosité plus forte <tag>out.action['moreBrightness--'+out.action.target]=Math.floor(256*7/100)</tag></item>
                                 <item>luminosité moins forte <tag>out.action['lessBrightness--'+out.action.target]=Math.floor(256*7/100)</tag></item>
-                                <item>teinte moins forte <tag>out.action['lessHue--'+out.action.target]=Math.floor(65536*7/100)</tag></item>
-                                <item>teinte plus forte <tag>out.action['moreHue--'+out.action.target]=Math.floor(65536*7/100)</tag></item>
+                                <item>teinte moins forte <tag>out.action['moreHue--'+out.action.target]=Math.floor(65536*7/100)</tag></item>
+                                <item>teinte plus forte <tag>out.action['lessHue--'+out.action.target]=Math.floor(65536*7/100)</tag></item>
                                 <item>température plus froide <tag>out.action['colder--'+out.action.target]=Math.floor((500-153)*7/100)</tag></item>
                                 <item>température plus chaude <tag>out.action['hotter--'+out.action.target]=Math.floor((500-153)*7/100)</tag></item>
                                 <item>couleur rouge <tag>out.action['setHue--'+out.action.target]=0</tag></item>

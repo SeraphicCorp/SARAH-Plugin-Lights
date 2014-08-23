@@ -56,7 +56,7 @@ exports.init = function(SARAH) {
     PhilipsHueModule = require('./classes/philips-hue').PhilipsHueModule(config, log, t);
 };
 
-exports.action = function(data, callback) {
+exports.action = function(data, callback, config, SARAH) {
 
     log('Data received by plugin ' + pluginName, 'DEBUG');
     log(data, 'DEBUG');
@@ -93,6 +93,5 @@ exports.action = function(data, callback) {
             CoreModule.setLight(id, usableData.device[id]);
         }
     }
-
-    return callback('tts', t('executing-order'));
+    return callback({'tts': t('executing-order')});
 };

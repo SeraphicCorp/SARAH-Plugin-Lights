@@ -32,37 +32,37 @@ var PhilipsHueModule = function(config, log, translationEngine) {
         this.sat = value;
     };
     PhilipsHue.prototype.moreSaturation = function(value) {
-        this.sat = addValue(this.sat, value, 256);
+        this.sat = this.addValue(this.sat, value, 256);
     };
     PhilipsHue.prototype.lessSaturation = function(value) {
-        this.sat = addValue(this.sat, -1 * value, 256);
+        this.sat = this.addValue(this.sat, -1 * value, 256);
     };
     PhilipsHue.prototype.setBrightness = function(value) {
         this.bri = value;
     };
     PhilipsHue.prototype.moreBrightness = function(value) {
-        this.bri = addValue(this.bri, value, 256);
+        this.bri = this.addValue(this.bri, value, 256);
     };
     PhilipsHue.prototype.lessBrightness = function(value) {
-        this.bri = addValue(this.bri, -1 * value, 256);
+        this.bri = this.addValue(this.bri, -1 * value, 256);
     };
     PhilipsHue.prototype.setHue = function(value) {
         this.hue = value;
     };
     PhilipsHue.prototype.moreHue = function(value) {
-        this.hue = addValue(this.hue, value, 65536);
+        this.hue = this.addValue(this.hue, value, 65536);
     };
     PhilipsHue.prototype.lessHue = function(value) {
-        this.hue = addValue(this.hue, -1 * value, 65536);
+        this.hue = this.addValue(this.hue, -1 * value, 65536);
     };
     PhilipsHue.prototype.setTemperature = function(value) {
         this.ct = value;
     };
     PhilipsHue.prototype.colder = function(value) {
-        this.ct = addValue(this.ct, -1 * value, 500 - 153) + 153;
+        this.ct = this.addValue(this.ct, -1 * value, 500 - 153) + 153;
     };
     PhilipsHue.prototype.hotter = function(value) {
-        this.ct = addValue(this.ct, -1 * value, 500 - 153) + 153;
+        this.ct = this.addValue(this.ct, -1 * value, 500 - 153) + 153;
     };
     PhilipsHue.prototype.setAlert = function(value) {
         this.alert = value !== '0' ? 'select' : 'none';
@@ -101,6 +101,7 @@ var PhilipsHueModule = function(config, log, translationEngine) {
         }
         log('Setting ' + instance.id + ' with ' + operation + ' ' + param, 'DEBUG');
         instance[operation](param);
+        log('Done', 'DEBUG');
     };
     PhilipsHue.prototype.execute = function(params) {
         var instance = this;
@@ -112,7 +113,7 @@ var PhilipsHueModule = function(config, log, translationEngine) {
             }
             bridge.put('lights/' + instance.id + '/state', instance.extractRequest(), showWebserviceReturn);
         };
-        bridge.get('lights/' + this.id, treat);
+        bridge.get('lights/' + instance.id, treat);
     };
 
 
