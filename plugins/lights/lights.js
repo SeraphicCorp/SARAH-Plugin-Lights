@@ -1,20 +1,28 @@
 var pluginName = 'lights';
 
 var LogFactory = function(config) {
-    return function(text, level) {
+    var generic = function(text, level) {
         if (!config.debug && typeof level !== 'undefined'){
             return;
         }
         console.log(text);
     };
+    var normal = function(text){generic(text);};
+    return {
+        fatal: normal,
+        error: normal,
+        warning: normal,
+        info: normal,
+        debug: function(text){generic(text, 'DEBUG');}
+    };
 };
 
 var t;
-var log;
+var Log;
 var CoreModule;
 var PhilipsHueModule;
 
-var CoreModuleFactory = function(config, log, t) {
+var CoreModuleFactory = function(config, Log, t) {
     var objectFactory = function(id) {
         var tmp = id.split("-");
         var type = tmp[0];
@@ -23,21 +31,21 @@ var CoreModuleFactory = function(config, log, t) {
             case 'hue':
                 return new PhilipsHueModule.PhilipsHue(objectID);
             default:
-                log(type + t('is-an-unknown-type'));
+                Log.warning(type + t('is-an-unknown-type'));
                 return null;
         }
     };
     var setLight = function(id, params) {
-        log('Treating light : ' + id, 'DEBUG');
+        Log.debug('Treating light : ' + id);
         var light = objectFactory(id);
         light.execute(params);
     };
     var setGroup = function(id, params) {
         if (!config.groups[id]) {
-            log(id + t('is-an-unknown-group'));
+            Log.warning(id + t('is-an-unknown-group'));
             return;
         }
-        log('Treating group : ' + id, 'DEBUG');
+        Log.debug('Treating group : ' + id);
         for (var index in config.groups[id]) {
             setLight(config.groups[id][index], params);
         }
@@ -51,15 +59,15 @@ var CoreModuleFactory = function(config, log, t) {
 exports.init = function(SARAH) {
     var config = SARAH.ConfigManager.getConfig().modules[pluginName];
     t = require('./internationalization').translationEngineFactory(config.language);
-    log = LogFactory(config);
-    CoreModule = CoreModuleFactory(config, log, t);
-    PhilipsHueModule = require('./classes/philips-hue').PhilipsHueModule(config, log, t);
+    Log = LogFactory(config);
+    CoreModule = CoreModuleFactory(config, Log, t);
+    PhilipsHueModule = require('./classes/philips-hue').PhilipsHueModule(config, Log, t);
 };
 
 exports.action = function(data, callback, config, SARAH) {
 
-    log('Data received by plugin ' + pluginName, 'DEBUG');
-    log(data, 'DEBUG');
+    Log.debug('Data received by plugin ' + pluginName);
+    Log.debug(data);
 
     var prepare = function(data) {
         var usableData = {device: {}, group: {}};
@@ -75,8 +83,8 @@ exports.action = function(data, callback, config, SARAH) {
             usableData[type][id] = usableData[type][id] || {};
             usableData[type][id][operation] = data[index];
         }
-        log('usableData', 'DEBUG');
-        log(usableData, 'DEBUG');
+        Log.debug('usableData');
+        Log.debug(usableData);
         return usableData;
     };
 

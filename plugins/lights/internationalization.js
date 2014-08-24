@@ -10,7 +10,8 @@ var text = {
         'executing-order': "D'accord, je m'en occupe",
         'is-an-unknown-type': " n'est pas un type connu",
         'is-an-unknown-group': " n'est pas un groupe connu",
-        'is-an-unknown-operation': " n'est pas une opération connue"
+        'is-an-unknown-operation': " n'est pas une opération connue",
+        'is-an-unimplemented-operation': " n'est pas une opération possible pour "
     }
 };
 

@@ -1,9 +1,9 @@
 var Light = require('./light');
 var request = require('request');
 
-// This way of coding is to initialize config, log, translationEngine in the module
-var PhilipsHueModule = function(config, log, translationEngine) {
-
+// This way of coding is to initialize config, logger, translationEngine in the module
+var PhilipsHueModule = function(config, Log, translationEngine) {
+    var Light = require('./light').LightModule(config, Log, translationEngine, 'Philips Hue').Light;
     var t = translationEngine;
 
     var state = {
@@ -22,11 +22,11 @@ var PhilipsHueModule = function(config, log, translationEngine) {
         this.effect = null;
         this.valuesToExtract = [];
     };
-    PhilipsHue.prototype = Object.create(PhilipsHue.prototype);
+    PhilipsHue.prototype = Object.create(Light.prototype);
     PhilipsHue.prototype.adaptValue = function(value, limit) {
         var newValue = (limit + parseInt(value)) % limit;
-        log('New value', 'DEBUG');
-        log(newValue, 'DEBUG');
+        Log.debug('New value');
+        Log.debug(newValue);
         return newValue;
     };
     PhilipsHue.prototype.switchOn = function(value) {
@@ -102,31 +102,31 @@ var PhilipsHueModule = function(config, log, translationEngine) {
         return extract;
     };
     var showWebserviceReturn = function(body) {
-        log('Return', 'DEBUG');
-        log(body, 'DEBUG');
+        Log.debug('Return');
+        Log.debug(body);
     };
     var executeOperation = function(instance, operation, param) {
         if (typeof instance[operation] !== 'function') {
-            log(operation + t('is-an-unknown-operation'));
+            Log.warning(operation + t('is-an-unknown-operation'));
             return;
         }
-        log('Setting ' + instance.id + ' with ' + operation + ' ' + param, 'DEBUG');
+        Log.debug('Setting ' + instance.id + ' with ' + operation + ' ' + param);
         instance[operation](param);
-        log('Done', 'DEBUG');
+        Log.debug('Done');
     };
     PhilipsHue.prototype.execute = function(params) {
         var instance = this;
-        log('Executing changes for Philips Hue ' + instance.id, 'DEBUG');
+        Log.debug('Executing changes for Philips Hue ' + instance.id);
         var treat = function(currentState) {
-            log('currentState', 'DEBUG');
-            log(currentState, 'DEBUG');
+            Log.debug('currentState');
+            Log.debug(currentState);
             instance.update(currentState.state);
             for (var operation in params) {
                 executeOperation(instance, operation, params[operation]);
             }
             var body = instance.extractRequest();
-            log('request', 'DEBUG');
-            log(body, 'DEBUG');
+            Log.debug('request');
+            Log.debug(body);
             bridge.put('lights/' + instance.id + '/state', body, showWebserviceReturn);
         };
         bridge.get('lights/' + instance.id, treat);
@@ -163,18 +163,18 @@ var PhilipsHueModule = function(config, log, translationEngine) {
             configuration: function() {
                 var valid = config['philips-hue']['hub-address'] && config['philips-hue']['api-user'];
                 if (!valid) {
-                    log(t('philips-hue-incomplete-configuration'));
+                    Log.error(t('philips-hue-incomplete-configuration'));
                     state.configuration = false;
                 }
                 state.configuration = true;
             },
             user: function() {
                 var callback = function(json) {
-                    log(t('philips-hue-user-configuration'));
+                    Log.info(t('philips-hue-user-configuration'));
                     // A TTS means an error
                     if (json.tts) {
                         state.user = false;
-                        log(t('philips-hue-bridge-unreachable'));
+                        Log.error(t('philips-hue-bridge-unreachable'));
                         return;
                     }
                     // User alread exists
@@ -189,13 +189,13 @@ var PhilipsHueModule = function(config, log, translationEngine) {
                     }, function(json) {
                         if (json.tts || json[0].error) {
                             state.user = false;
-                            log(t('philips-hue-bridge-unreachable'));
-                            log(json.tts || json[0].error.description);
+                            Log.error(t('philips-hue-bridge-unreachable'));
+                            Log.error(json.tts || json[0].error.description);
                             return;
                         }
                         state.user = true;
                         config['philips-hue']['api-user'] = json[0].success.username;
-                        log(t('philips-hue-user-created') + ' : ' + config['philips-hue']['api-user']);
+                        Log.info(t('philips-hue-user-created') + ' : ' + config['philips-hue']['api-user']);
                     });
                 };
                 bridge.get('', callback);
