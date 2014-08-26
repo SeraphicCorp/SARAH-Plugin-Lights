@@ -9,10 +9,15 @@
                 <item>
                     <one-of>
                         <item>allume la lumière <tag>out.action.switchOn=1</tag></item>
+                        <item>allumer la lumière <tag>out.action.switchOn=1</tag></item>
                         <item>éclaire <tag>out.action.switchOn=1</tag></item>
+                        <item>éclairer <tag>out.action.switchOn=1</tag></item>
                         <item>éteins la lumière <tag>out.action.switchOn=0</tag></item>
+                        <item>éteindre la lumière <tag>out.action.switchOn=0</tag></item>
                         <item>définis la lumière </item>
+                        <item>définir la lumière </item>
                         <item>règle la lumière </item>
+                        <item>règler la lumière </item>
                     </one-of>
                 </item>
 

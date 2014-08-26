@@ -1,9 +1,8 @@
-var Light = require('./light');
 var request = require('request');
 
 // This way of coding is to initialize config, logger, translationEngine in the module
 var PhilipsHueModule = function(config, Log, translationEngine) {
-    var Light = require('./light').LightModule(config, Log, translationEngine, 'Philips Hue').Light;
+    var RGBLight = require('./rgb-light').RGBLightModule(config, Log, translationEngine, 'Philips Hue').RGBLight;
     var t = translationEngine;
 
     var state = {
@@ -12,99 +11,74 @@ var PhilipsHueModule = function(config, Log, translationEngine) {
     };
 
     var PhilipsHue = function(id) {
-        this.id = id;
-        this.on = null;
-        this.sat = null;
-        this.bri = null;
-        this.hue = null;
-        this.ct = null;
+        this.base = RGBLight;
+        this.base(id);
         this.alert = null;
         this.effect = null;
-        this.valuesToExtract = [];
     };
-    PhilipsHue.prototype = Object.create(Light.prototype);
-    PhilipsHue.prototype.adaptValue = function(value, limit) {
-        var newValue = (limit + parseInt(value)) % limit;
-        Log.debug('New value');
-        Log.debug(newValue);
-        return newValue;
-    };
-    PhilipsHue.prototype.switchOn = function(value) {
-        var newValue = value !== '0';
-        if (this.on === newValue){
-            return;
-        }
-        this.on = newValue;
-        this.valuesToExtract.push('on');
-    };
-    PhilipsHue.prototype.setSaturation = function(value) {
-        this.sat = this.adaptValue(value, 256);
-        this.valuesToExtract.push('sat');
-    };
-    PhilipsHue.prototype.moreSaturation = function(value) {
-        this.setSaturation(this.sat + parseInt(value));
-    };
-    PhilipsHue.prototype.lessSaturation = function(value) {
-        this.setSaturation(this.sat - parseInt(value));
-    };
-    PhilipsHue.prototype.setBrightness = function(value) {
-        this.bri = this.adaptValue(value, 256);
-        this.valuesToExtract.push('bri');
-    };
-    PhilipsHue.prototype.moreBrightness = function(value) {
-        this.setBrightness(this.bri + parseInt(value));
-    };
-    PhilipsHue.prototype.lessBrightness = function(value) {
-        this.setBrightness(this.bri - parseInt(value));
-    };
-    PhilipsHue.prototype.setHue = function(value) {
-        this.hue = this.adaptValue(value, 65536);
-        this.valuesToExtract.push('hue');
-    };
-    PhilipsHue.prototype.moreHue = function(value) {
-        this.setHue(this.hue + parseInt(value));
-    };
-    PhilipsHue.prototype.lessHue = function(value) {
-        this.setHue(this.hue - parseInt(value));
-    };
-    PhilipsHue.prototype.setTemperature = function(value) {
-        this.ct = this.adaptValue(value, 500 - 153) + 153;
-        this.valuesToExtract.push('ct');
-    };
-    PhilipsHue.prototype.colder = function(value) {
-        this.setTemperature(this.ct - parseInt(value));
-    };
-    PhilipsHue.prototype.hotter = function(value) {
-        this.setTemperature(this.ct + parseInt(value));
-    };
+    PhilipsHue.prototype = new RGBLight;
+
+    PhilipsHue.prototype.PROTOCOL_MIN_BRIGHTNESS = 0;
+    PhilipsHue.prototype.PROTOCOL_MAX_BRIGHTNESS = 255;
+    PhilipsHue.prototype.PROTOCOL_MIN_SATURATION = 0;
+    PhilipsHue.prototype.PROTOCOL_MAX_SATURATION = 255;
+    PhilipsHue.prototype.PROTOCOL_MIN_HUE = 0;
+    PhilipsHue.prototype.PROTOCOL_MAX_HUE = 65535;
+    PhilipsHue.prototype.PROTOCOL_MIN_TEMPERATURE = 153;
+    PhilipsHue.prototype.PROTOCOL_MAX_TEMPERATURE = 500;
+
     PhilipsHue.prototype.setAlert = function(value) {
         this.alert = value !== '0' ? 'select' : 'none';
         this.valuesToExtract.push('alert');
     };
+
     PhilipsHue.prototype.setEffect = function(value) {
         this.effect = value;
         this.valuesToExtract.push('effect');
     };
+
     PhilipsHue.prototype.update = function(currentState) {
         this.on = currentState.on;
-        this.sat = currentState.sat;
-        this.bri = currentState.bri;
-        this.hue = currentState.hue;
-        this.ct = currentState.ct;
+        this.saturation = this.scale(currentState.sat, this.PROTOCOL_MIN_SATURATION, this.PROTOCOL_MAX_SATURATION, this.MIN_SATURATION, this.MAX_SATURATION);
+        this.brightness = this.scale(currentState.bri, this.PROTOCOL_MIN_BRIGHTNESS, this.PROTOCOL_MAX_BRIGHTNESS, this.MIN_BRIGHTNESS, this.MAX_BRIGHTNESS);
+        this.hue = this.scale(currentState.hue, this.PROTOCOL_MIN_HUE, this.PROTOCOL_MAX_HUE, this.MIN_HUE, this.MAX_HUE);
+        this.temperature = this.scale(currentState.ct, this.PROTOCOL_MIN_TEMPERATURE, this.PROTOCOL_MAX_TEMPERATURE, this.MIN_TEMPERATURE, this.MAX_TEMPERATURE);
         this.alert = currentState.alert;
         this.effect = currentState.effect;
     };
+
+    var adaptName = function(type){
+        switch(type){
+            case 'saturation': return 'sat';
+            case 'brightness': return 'bri';
+            case 'temperature': return 'ct';
+            default: return type;
+        }
+    };
+
+    var adaptValue = function(type, instance){
+        switch(type){
+            case 'saturation': return instance.scale(instance[type], instance.MIN_SATURATION, instance.MAX_SATURATION, instance.PROTOCOL_MIN_SATURATION, instance.PROTOCOL_MAX_SATURATION);
+            case 'brightness': return instance.scale(instance[type], instance.MIN_BRIGHTNESS, instance.MAX_BRIGHTNESS, instance.PROTOCOL_MIN_BRIGHTNESS, instance.PROTOCOL_MAX_BRIGHTNESS);
+            case 'hue': return instance.scale(instance[type], instance.MIN_HUE, instance.MAX_HUE, instance.PROTOCOL_MIN_HUE, instance.PROTOCOL_MAX_HUE);
+            case 'temperature': return instance.scale(instance[type], instance.MIN_TEMPERATURE, instance.MAX_TEMPERATURE, instance.PROTOCOL_MIN_TEMPERATURE, instance.PROTOCOL_MAX_TEMPERATURE);
+            default: return instance[type];
+        }
+    };
+
     PhilipsHue.prototype.extractRequest = function() {
         var extract = {};
         for (var index in this.valuesToExtract){
-            extract[this.valuesToExtract[index]] = this[this.valuesToExtract[index]];
+            extract[adaptName(this.valuesToExtract[index])] = adaptValue(this.valuesToExtract[index], this);
         }
         return extract;
     };
+
     var showWebserviceReturn = function(body) {
         Log.debug('Return');
         Log.debug(body);
     };
+
     var executeOperation = function(instance, operation, param) {
         if (typeof instance[operation] !== 'function') {
             Log.warning(operation + t('is-an-unknown-operation'));
@@ -114,6 +88,7 @@ var PhilipsHueModule = function(config, Log, translationEngine) {
         instance[operation](param);
         Log.debug('Done');
     };
+
     PhilipsHue.prototype.execute = function(params) {
         var instance = this;
         Log.debug('Executing changes for Philips Hue ' + instance.id);
