@@ -1,0 +1,53 @@
+<div class="row">
+    <h2>Présentation</h2>
+    <p>
+        Ce plugin vous permet de controller votre luminaire connecté (uniquement Philips Hue pour le moment mais d'autres protocoles viendront).&nbsp;
+        L'idée est de centraliser le contrôle de la lumière et manipuler des ampoules différentes (classiques, ambiance, sonores...) de manière homogène.&nbsp;
+        Il est ainsi possible de créer des groupes de luminaire hétérogène.
+    </p>
+    <h2>Configuration</h2>
+    <p>
+        Je recommande de modifier votre configuration en éditant directement le fichier lights.prop, la structure de la configuration étant un peu spéciale.&nbsp;
+        Vous devez modifier l'adresse de votre pont Philips hue (dans le fichier propriété 'hub-address' de 'philips-hue'. Lors du premier lancement du serveur avec ce plugin, appuyez sur le bouton du pont pour autoriser le plugin à l'utiliser.&nbsp;
+        Pour configurer les groupes, définissez un nouvel élément dans 'groups', donnez le nom de groupe que vous désirez (attention, n'utilisez pas de chaine "--" dans le nom du groupe) et indiquez les luminaires en faisant partie.&nbsp;
+        Les luminaires sont désignés par leur type (pour le moment, uniquement "hue" et leur identifiant.&nbsp;
+        Ces 2 éléments sont regroupés au sein de la même chaine de caractère et séparés par un tiret.
+    </p>
+    <h2>Personnalisation</h2>
+    <p>
+        La personnalisation se fait dans le XML contenant les phrases à reconnaitre.&nbsp;
+        Pour appeler une opération sur un luminaire ou un groupe, il suffit d'appeler dans une balise &LT;tag&GT;, out.action['A--B--C']='d';
+    </p>
+    <ul>
+        <li>A représente l'opération à effectuer (la liste des opérations est listée plus loin).</li>
+        <li>B représente la portée de l'opération. Les valeurs sont "group" pour un groupe et "device" pour un luminaire individuel.</li>
+        <li>C représente l'identifiant de ce qu'il y a à manipuler. Les valeurs sont des noms de groupes que vous avez définis ou "hue-X" avec X identifiant d'une ampoule hue.</li>
+        <li>d représente la valeur utilisée pour l'opération.</li>
+    </ul>
+    <h3>Liste des opérations</h3>
+    <ul>
+        <li>switchOn : Prend un 0 ou 1 en paramètre, allumé ou éteint</li>
+        <li>setSaturation: Prend un entier entre 0 (blanc) et 255 (très coloré), permet de choisir la force de la coloration</li>
+        <li>moreSaturation: Prend un entier, permet de choisir d'augmenter la force de la coloration</li>
+        <li>lessSaturation: Prend un entier, permet de choisir de diminuer la force de la coloration</li>
+        <li>setBrightness : Prend un entier entre 0 (sombre) et 255 (lumineux), permet de choisir l'intensité de l'éclairage</li>
+        <li>moreBrightness: Prend un entier, permet de choisir d'augmenter l'intensité de l'éclairage</li>
+        <li>lessBrightness: Prend un entier, permet de choisir de diminuer l'intensité de l'éclairage</li>
+        <li>setHue : Prend un entier entre 0 et 65535, permet de choisir la teinte de la lumière. 0 et 65535 sont rouges, 25500 est verte et 46920 est bleue.</li>
+        <li>moreHue : Prend un entier, permet de modifier la teinte</li>
+        <li>lessHue : Prend un entier, permet de modifier la teinte</li>
+        <li>setTemperature : Prend un entier entre 153 et 500, permet de choisir la température de la couleur de la lumière.</li>
+        <li>colder : Prend un entier, permet de diminuer la température de la couleur de l'éclairage.</li>
+        <li>hotter : Prend un entier, permet d'augmenter la température de la couleur de l'éclairage.</li>
+        <li>setAlert Prend un 0 ou 1 en paramètre, actif ou inactif</li>
+        <li>setEffect : Prend une chaine de caractèreen paramètre. 'none' pour aucun effet, 'colorloop' pour faire varier la teinte de la lumière à l'intensité et coloration définie.</li>
+    </ul>
+
+    <h2>Informations</h2>
+    <ul>
+        <li><a href="https://github.com/SeraphicCorp/SARAH-Plugin-Lights">Site du plugin</a></li>
+        <li><a href="https://github.com/SeraphicCorp/SARAH-Plugin-Lights/issues">Signaler un problème</a></li>
+        <li><a href="http://www.seraphiccorp.com/">(Futur) Site de l'auteur</a></li>
+        <li><a href="https://twitter.com/SeraphicCorp">Twitter</a></li>
+    </ul>
+</div>
