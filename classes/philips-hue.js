@@ -47,28 +47,37 @@ var PhilipsHueModule = function(config, Log, translationEngine) {
         this.effect = currentState.effect;
     };
 
-    var adaptName = function(type){
-        switch(type){
-            case 'saturation': return 'sat';
-            case 'brightness': return 'bri';
-            case 'temperature': return 'ct';
-            default: return type;
+    var adaptName = function(type) {
+        switch (type) {
+            case 'saturation':
+                return 'sat';
+            case 'brightness':
+                return 'bri';
+            case 'temperature':
+                return 'ct';
+            default:
+                return type;
         }
     };
 
-    var adaptValue = function(type, instance){
-        switch(type){
-            case 'saturation': return instance.scale(instance[type], instance.MIN_SATURATION, instance.MAX_SATURATION, instance.PROTOCOL_MIN_SATURATION, instance.PROTOCOL_MAX_SATURATION);
-            case 'brightness': return instance.scale(instance[type], instance.MIN_BRIGHTNESS, instance.MAX_BRIGHTNESS, instance.PROTOCOL_MIN_BRIGHTNESS, instance.PROTOCOL_MAX_BRIGHTNESS);
-            case 'hue': return instance.scale(instance[type], instance.MIN_HUE, instance.MAX_HUE, instance.PROTOCOL_MIN_HUE, instance.PROTOCOL_MAX_HUE);
-            case 'temperature': return instance.scale(instance[type], instance.MIN_TEMPERATURE, instance.MAX_TEMPERATURE, instance.PROTOCOL_MIN_TEMPERATURE, instance.PROTOCOL_MAX_TEMPERATURE);
-            default: return instance[type];
+    var adaptValue = function(type, instance) {
+        switch (type) {
+            case 'saturation':
+                return instance.scale(instance[type], instance.MIN_SATURATION, instance.MAX_SATURATION, instance.PROTOCOL_MIN_SATURATION, instance.PROTOCOL_MAX_SATURATION);
+            case 'brightness':
+                return instance.scale(instance[type], instance.MIN_BRIGHTNESS, instance.MAX_BRIGHTNESS, instance.PROTOCOL_MIN_BRIGHTNESS, instance.PROTOCOL_MAX_BRIGHTNESS);
+            case 'hue':
+                return instance.scale(instance[type], instance.MIN_HUE, instance.MAX_HUE, instance.PROTOCOL_MIN_HUE, instance.PROTOCOL_MAX_HUE);
+            case 'temperature':
+                return instance.scale(instance[type], instance.MIN_TEMPERATURE, instance.MAX_TEMPERATURE, instance.PROTOCOL_MIN_TEMPERATURE, instance.PROTOCOL_MAX_TEMPERATURE);
+            default:
+                return instance[type];
         }
     };
 
     PhilipsHue.prototype.extractRequest = function() {
         var extract = {};
-        for (var index in this.valuesToExtract){
+        for (var index in this.valuesToExtract) {
             extract[adaptName(this.valuesToExtract[index])] = adaptValue(this.valuesToExtract[index], this);
         }
         return extract;
@@ -79,16 +88,6 @@ var PhilipsHueModule = function(config, Log, translationEngine) {
         Log.debug(body);
     };
 
-    var executeOperation = function(instance, operation, param) {
-        if (typeof instance[operation] !== 'function') {
-            Log.warning(operation + t('is-an-unknown-operation'));
-            return;
-        }
-        Log.debug('Setting ' + instance.id + ' with ' + operation + ' ' + param);
-        instance[operation](param);
-        Log.debug('Done');
-    };
-
     PhilipsHue.prototype.execute = function(params) {
         var instance = this;
         Log.debug('Executing changes for Philips Hue ' + instance.id);
@@ -96,9 +95,7 @@ var PhilipsHueModule = function(config, Log, translationEngine) {
             Log.debug('currentState');
             Log.debug(currentState);
             instance.update(currentState.state);
-            for (var operation in params) {
-                executeOperation(instance, operation, params[operation]);
-            }
+            instance.executeOperations(params);
             var body = instance.extractRequest();
             Log.debug('request');
             Log.debug(body);
@@ -119,7 +116,7 @@ var PhilipsHueModule = function(config, Log, translationEngine) {
             bridge.request(path, {'method': 'put', 'body': JSON.stringify(body)}, callback);
         },
         request: function(path, data, callback) {
-            data.uri = 'http://' + config['philips-hue']['hub-address'] + '/api' + (path !== false ? '/' + config['philips-hue']['api-user'] + '/' + path : '');
+            data.uri = 'http://' + config['hub-address'] + '/api' + (path !== false ? '/' + config['api-user'] + '/' + path : '');
             data.json = true;
             request(data, function(err, response, json) {
                 if (err || response.statusCode !== 200) {
@@ -136,7 +133,7 @@ var PhilipsHueModule = function(config, Log, translationEngine) {
     var canUse = function() {
         var test = {
             configuration: function() {
-                var valid = config['philips-hue']['hub-address'] && config['philips-hue']['api-user'];
+                var valid = config['hub-address'] && config['api-user'];
                 if (!valid) {
                     Log.error(t('philips-hue-incomplete-configuration'));
                     state.configuration = false;
@@ -160,7 +157,7 @@ var PhilipsHueModule = function(config, Log, translationEngine) {
                     // Create a new user
                     bridge.post(false, {
                         'devicetype': 'S.A.R.A.H.',
-                        'username': config['philips-hue']['api-user']
+                        'username': config['api-user']
                     }, function(json) {
                         if (json.tts || json[0].error) {
                             state.user = false;
@@ -169,15 +166,15 @@ var PhilipsHueModule = function(config, Log, translationEngine) {
                             return;
                         }
                         state.user = true;
-                        config['philips-hue']['api-user'] = json[0].success.username;
-                        Log.info(t('philips-hue-user-created') + ' : ' + config['philips-hue']['api-user']);
+                        config['api-user'] = json[0].success.username;
+                        Log.info(t('philips-hue-user-created') + ' : ' + config['api-user']);
                     });
                 };
                 bridge.get('', callback);
             }
         };
 
-        if (config['philips-hue']) {
+        if (config) {
             test.configuration();
             test.user();
         }

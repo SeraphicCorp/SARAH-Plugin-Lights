@@ -2,18 +2,22 @@ var pluginName = 'lights';
 
 var LogFactory = function(config) {
     var generic = function(text, level) {
-        if (!config.debug && typeof level !== 'undefined'){
+        if (!config.debug && typeof level !== 'undefined') {
             return;
         }
         console.log(text);
     };
-    var normal = function(text){generic(text);};
+    var normal = function(text) {
+        generic(text);
+    };
     return {
         fatal: normal,
         error: normal,
         warning: normal,
         info: normal,
-        debug: function(text){generic(text, 'DEBUG');}
+        debug: function(text) {
+            generic(text, 'DEBUG');
+        }
     };
 };
 
@@ -21,6 +25,7 @@ var t;
 var Log;
 var CoreModule;
 var PhilipsHueModule;
+var MilightRGBWModule;
 
 var CoreModuleFactory = function(config, Log, t) {
     var objectFactory = function(id) {
@@ -30,6 +35,8 @@ var CoreModuleFactory = function(config, Log, t) {
         switch (type) {
             case 'hue':
                 return new PhilipsHueModule.PhilipsHue(objectID);
+            case 'milightrgbw':
+                return new MilightRGBWModule.MilightRGBW(tmp[1], tmp[2]);
             default:
                 Log.warning(type + t('is-an-unknown-type'));
                 return null;
@@ -61,7 +68,8 @@ exports.init = function(SARAH) {
     t = require('./internationalization').translationEngineFactory(config.language);
     Log = LogFactory(config);
     CoreModule = CoreModuleFactory(config, Log, t);
-    PhilipsHueModule = require('./classes/philips-hue').PhilipsHueModule(config, Log, t);
+    PhilipsHueModule = require('./classes/philips-hue').PhilipsHueModule(config['philips-hue'], Log, t);
+    MilightRGBWModule = require('./classes/milight-rgbw').MilightRGBWModule(config['milight'], Log, t);
 };
 
 exports.action = function(data, callback, config, SARAH) {

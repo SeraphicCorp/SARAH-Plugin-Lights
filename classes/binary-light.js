@@ -7,8 +7,8 @@ var BinaryLightModule = function(config, Log, translationEngine, type) {
         this.valuesToExtract = [];
     };
 
-    BinaryLight.prototype.defaultImplementation = function(operationName){
-        Log.warning(operationName+translationEngine('is-an-unimplemented-operation')+type);
+    BinaryLight.prototype.defaultImplementation = function(operationName) {
+        Log.warning(operationName + translationEngine('is-an-unimplemented-operation') + type);
     };
 
     BinaryLight.prototype.adaptValue = function(value, minimalValue, maximalValue) {
@@ -19,7 +19,7 @@ var BinaryLightModule = function(config, Log, translationEngine, type) {
         return newValue;
     };
 
-    BinaryLight.prototype.scale = function(value, originalMinValue, originalMaxValue, adaptedMinValue, adaptedMaxValue){
+    BinaryLight.prototype.scale = function(value, originalMinValue, originalMaxValue, adaptedMinValue, adaptedMaxValue) {
         var originalRange = originalMaxValue - originalMinValue;
         var adaptedRange = adaptedMaxValue - adaptedMinValue;
         return (value - originalMinValue) * adaptedRange / originalRange + adaptedMinValue;
@@ -29,7 +29,7 @@ var BinaryLightModule = function(config, Log, translationEngine, type) {
     /* value : 0 or 1*/
     BinaryLight.prototype.switchOn = function(value) {
         var newValue = value !== '0';
-        if (this.on === newValue){
+        if (this.on === newValue) {
             return;
         }
         this.on = newValue;
@@ -91,6 +91,23 @@ var BinaryLightModule = function(config, Log, translationEngine, type) {
     BinaryLight.prototype.setEffect = function(value) {
         defaultError('setEffect');
     };
+
+    BinaryLight.prototype.executeOperation = function(operation, param) {
+        if (typeof this[operation] !== 'function') {
+            Log.warning(operation + t('is-an-unknown-operation'));
+            return;
+        }
+        Log.debug('Setting ' + this.id + ' with ' + operation + ' ' + param);
+        this[operation](param);
+        Log.debug('Done');
+    };
+
+    BinaryLight.prototype.executeOperations = function(params) {
+        for (var operation in params) {
+            this.executeOperation(operation, params[operation]);
+        }
+    };
+
     /* params : object of values indexed by string representing operations for command pattern
      * example : {'switchOn': true, 'lessHue': 42}
      * */
