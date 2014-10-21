@@ -37,59 +37,59 @@ var BinaryLightModule = function(config, Log, translationEngine, type) {
     };
     /* value : Integer between 0 (white) and 255 (maximal saturation) */
     BinaryLight.prototype.setSaturation = function(value) {
-        defaultError('setSaturation');
+        this.defaultImplementation('setSaturation');
     };
     /* value : Integer, if the computed value is outside range, a modulo operation with set it in range */
     BinaryLight.prototype.moreSaturation = function(value) {
-        defaultError('moreSaturation');
+        this.defaultImplementation('moreSaturation');
     };
     /* value : Integer, if the computed value is outside range, a modulo operation with set it in range */
     BinaryLight.prototype.lessSaturation = function(value) {
-        defaultError('lessSaturation');
+        this.defaultImplementation('lessSaturation');
     };
     /* value : Integer between 0 (darkest) and 255 (brightest) */
     BinaryLight.prototype.setBrightness = function(value) {
-        defaultError('setBrightness');
+        this.defaultImplementation('setBrightness');
     };
     /* value : Integer, if the computed value is outside range, a modulo operation with set it in range */
     BinaryLight.prototype.moreBrightness = function(value) {
-        defaultError('moreBrightness');
+        this.defaultImplementation('moreBrightness');
     };
     /* value : Integer, if the computed value is outside range, a modulo operation with set it in range */
     BinaryLight.prototype.lessBrightness = function(value) {
-        defaultError('lessBrightness');
+        this.defaultImplementation('lessBrightness');
     };
     /* value : Integer between 0 and 65535. 0 is red, 25500 is green and 46920 is blue */
     BinaryLight.prototype.setHue = function(value) {
-        defaultError('setHue');
+        this.defaultImplementation('setHue');
     };
     /* value : Integer, if the computed value is outside range, a modulo operation with set it in range */
     BinaryLight.prototype.moreHue = function(value) {
-        defaultError('moreHue');
+        this.defaultImplementation('moreHue');
     };
     /* value : Integer, if the computed value is outside range, a modulo operation with set it in range */
     BinaryLight.prototype.lessHue = function(value) {
-        defaultError('lessHue');
+        this.defaultImplementation('lessHue');
     };
     /* value : Integer between 153 (coldest) and 500 (hottest) */
     BinaryLight.prototype.setTemperature = function(value) {
-        defaultError('setTemperature');
+        this.defaultImplementation('setTemperature');
     };
     /* value : Integer, if the computed value is outside range, a modulo operation with set it in range */
     BinaryLight.prototype.colder = function(value) {
-        defaultError('setSaturation');
+        this.defaultImplementation('setSaturation');
     };
     /* value : Integer, if the computed value is outside range, a modulo operation with set it in range */
     BinaryLight.prototype.hotter = function(value) {
-        defaultError('hotter');
+        this.defaultImplementation('hotter');
     };
     /* value: 0 or 1 */
     BinaryLight.prototype.setAlert = function(value) {
-        defaultError('setAlert');
+        this.defaultImplementation('setAlert');
     };
     /* value: array of string*/
     BinaryLight.prototype.setEffect = function(value) {
-        defaultError('setEffect');
+        this.defaultImplementation('setEffect');
     };
 
     BinaryLight.prototype.executeOperation = function(operation, param) {
@@ -112,7 +112,7 @@ var BinaryLightModule = function(config, Log, translationEngine, type) {
      * example : {'switchOn': true, 'lessHue': 42}
      * */
     BinaryLight.prototype.execute = function(params) {
-        defaultError('execute');
+        this.defaultImplementation('execute');
     };
 
     return {

@@ -35,10 +35,13 @@
                     <item>
                         <one-of>
                             <item>salon
-                                <tag>out.action.target='device--hue-3';</tag>
+                                <tag>out.action.target='group--salon';</tag>
                             </item>
                             <item>chambre
                                 <tag>out.action.target='group--chambre';</tag>
+                            </item>
+                            <item>cuisine
+                                <tag>out.action.target='group--cuisine';</tag>
                             </item>
                         </one-of>
                         <tag>if(typeof out.action.switchOn !== 'undefined'){out.action['switchOn--'+out.action.target]=out.action.switchOn}</tag>

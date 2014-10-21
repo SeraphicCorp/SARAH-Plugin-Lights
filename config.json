@@ -1,0 +1,20 @@
+{
+    "philips-hue": {
+        "hub-address": "hue.example.com",
+        "api-user": "sarah-lights"
+    },
+    "milight": {
+        "1": {
+            "hub-address": "hub1.milight.seraphiccorp.com",
+            "hub-port": 8899
+        }
+    },
+    "language": "fr",
+    "groups": {
+        "chambre": ["hue-1", "hue-2", "milightrgbw-1-1"],
+        "salon": ["hue-3", "milightrgbw-1-2"],
+        "cuisine": ["milightrgbw-1-3"],
+        "tout": ["milightrgbw-1-0"]
+    },
+    "debug": true
+}

@@ -1,8 +1,8 @@
 /* There is no saturation or temperature equivalent with this bulb */
 
-var MilightRGBWModule = function(config, Log, translationEngine) {
+var MilightRGBWModule = function (config, Log, translationEngine) {
     var RGBLight = require('./rgb-light').RGBLightModule(config, Log, translationEngine, 'Milight RGBW').RGBLight;
-    var MilightRGBW = function(hubId, bulbId) {
+    var MilightRGBW = function (hubId, bulbId) {
         this.base = RGBLight;
         this.base(hubId + "-" + bulbId);
         this.hubId = hubId;
@@ -11,7 +11,7 @@ var MilightRGBWModule = function(config, Log, translationEngine) {
         this.hue = null;
         this.temperature = null;
         this.colorChanged = false;
-        this.client = connect(config);
+        this.client = connect(hubId, config);
     };
     MilightRGBW.prototype = new RGBLight;
     MilightRGBW.prototype.PROTOCOL_MIN_BRIGHTNESS = 2;
@@ -22,81 +22,121 @@ var MilightRGBWModule = function(config, Log, translationEngine) {
     MilightRGBW.prototype.PROTOCOL_MAX_HUE = 255;
     MilightRGBW.prototype.PROTOCOL_MIN_TEMPERATURE = 0;
     MilightRGBW.prototype.PROTOCOL_MAX_TEMPERATURE = 1;
-    MilightRGBW.prototype.sendCommand = function(bytes) {
-        Log.debug("Send to " + config[this.hubId] + " (" + this.bulbId + ") :");
-        Log.debug(bytes);
-        this.client.execute(this.hubId, bytes);
+
+    MilightRGBW.prototype.setSaturation = function (value) {
+        this.defaultImplementation('setSaturation');
     };
-    MilightRGBW.prototype.commandSwitch = function(setOn) {
-        var command;
+
+    MilightRGBW.prototype.moreSaturation = function (value) {
+        this.defaultImplementation('moreSaturation');
+    };
+
+    MilightRGBW.prototype.lessSaturation = function (value) {
+        this.defaultImplementation('lessSaturation');
+    };
+
+    MilightRGBW.prototype.sendCommand = function (bytes) {
+        Log.debug("Send to " + config[this.hubId]['hub-address'] + ':' + config[this.hubId]['hub-port'] + " (Bulb : " + this.bulbId + ") :");
+        this.client.execute(bytes);
+    };
+
+    MilightRGBW.prototype.commandSwitch = function () {
+        var command, offset = 1;
         switch (this.bulbId) {
             case '0':
                 command = 0x42;
+                offset = -1;
+                break;
             case '1':
                 command = 0x45;
+                break;
             case '2':
                 command = 0x47;
+                break;
             case '3':
                 command = 0x49;
+                break;
             case '4':
                 command = 0x4B;
+                break;
         }
-        this.sendCommand([command + (setOn ? 0 : -1), 0x00, 0x55]);
+        this.sendCommand([command + (this.on ? 0 : offset), 0x00, 0x55]);
     };
-    MilightRGBW.prototype.commandBrightness = function() {
+
+    MilightRGBW.prototype.commandBrightness = function () {
         var instance = this;
-        var execute = function() {
+        var execute = function () {
             var v = instance.scale(instance.brightness, instance.MIN_BRIGHTNESS, instance.MAX_BRIGHTNESS, instance.PROTOCOL_MIN_BRIGHTNESS, instance.PROTOCOL_MAX_BRIGHTNESS);
-            v = 0x00 + Math.trunc(v);
+            v = 0x00 + Math.floor(v);
             instance.sendCommand([0x4E, v, 0x55]);
         };
         this.commandSwitch(true);
         setTimeout(execute, 100);
     };
-    MilightRGBW.prototype.commandRGB = function() {
+
+    MilightRGBW.prototype.commandRGB = function () {
         var instance = this;
-        var execute = function() {
+        var execute = function () {
             var h = instance.scale(instance.hue, instance.MIN_HUE, instance.MAX_HUE, instance.PROTOCOL_MIN_HUE, instance.PROTOCOL_MAX_HUE);
-            h = 0x00 + Math.trunc(h);
+            h = 0x00 + Math.floor(h);
             instance.sendCommand([0x40, h, 0x55]);
         };
         this.commandSwitch(true);
         setTimeout(execute, 100);
     };
-    var executeCommands = function(instance, commands) {
+
+    MilightRGBW.prototype.executeCommands = function (commands) {
+        Log.debug('commands');
+        Log.debug(commands);
         for (var index in commands) {
             switch (commands[index]) {
                 case 'on' :
-                    instance.commandBrightness();
+                    this.commandSwitch();
+                    break;
+                case 'brightness' :
+                    this.commandBrightness();
+                    break;
                 case 'saturation' :
-                    instance.commandRGB();
+                    this.commandRGB();
+                    break;
                 default :
-                    Log.warning(this.id + " does not support " + commands[index]);
+                    Log.warning(commands[index] + t('is-an-unimplemented-operation') + this.id + " does not support ");
             }
         }
     };
-    var connect = function(config) {
-        var dgram = require('dgram');
-        var socket = dgram.createSocket('udp4');
+
+    var connect = function (hubId, config) {
+        var lib = require('dgram');
+        var socket = null;
+        var hubConfig = config[hubId];
         return {
-            execute: function(hubId, commands) {
-                socket.send(new Buffer(commands), 0, commands.length, config[hubId]['hub-port'], config[hubId]['hub-address'], function(err, bytes) {
-                    Log.debug('err');
-                    Log.debug(err);
-                    Log.debug('bytes');
-                    Log.debug(bytes);
+            start: function () {
+                socket = lib.createSocket('udp4');
+            },
+            execute: function (commands) {
+                var bytes = new Buffer(commands, 'hex');
+                Log.debug(bytes);
+                socket.send(bytes, 0, commands.length, hubConfig['hub-port'], hubConfig['hub-address'], function (err, bytes) {
+                    if (err !== null) {
+                        Log.debug('err');
+                        Log.debug(err);
+                    } else {
+                        Log.debug('bytes');
+                        Log.debug(bytes);
+                    }
                 });
             },
-            close: function() {
-                socket.close();
+            close: function () {
             }
         };
     };
-    MilightRGBW.prototype.execute = function(params) {
+
+    MilightRGBW.prototype.execute = function (params) {
+        this.client.start();
         var instance = this;
         Log.debug('Executing changes for Milight RGBW ' + instance.id);
         this.executeOperations(params);
-        executeCommands(this, this.valuesToExtract);
+        this.executeCommands(this.valuesToExtract);
         this.client.close();
     };
     return {

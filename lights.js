@@ -33,8 +33,8 @@ var CoreModuleFactory = function(config, Log, t) {
         var type = tmp[0];
         var objectID = tmp[1];
         switch (type) {
-            case 'hue':
-                return new PhilipsHueModule.PhilipsHue(objectID);
+//            case 'hue':
+//                return new PhilipsHueModule.PhilipsHue(objectID);
             case 'milightrgbw':
                 return new MilightRGBWModule.MilightRGBW(tmp[1], tmp[2]);
             default:
@@ -45,6 +45,9 @@ var CoreModuleFactory = function(config, Log, t) {
     var setLight = function(id, params) {
         Log.debug('Treating light : ' + id);
         var light = objectFactory(id);
+        if (light === null){
+            return;
+        }
         light.execute(params);
     };
     var setGroup = function(id, params) {
@@ -63,8 +66,8 @@ var CoreModuleFactory = function(config, Log, t) {
     };
 };
 
-exports.init = function(SARAH) {
-    var config = SARAH.ConfigManager.getConfig().modules[pluginName];
+exports.init = function() {
+    var config = require('./config');
     t = require('./internationalization').translationEngineFactory(config.language);
     Log = LogFactory(config);
     CoreModule = CoreModuleFactory(config, Log, t);
